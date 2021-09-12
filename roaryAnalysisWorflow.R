@@ -1,33 +1,19 @@
 ##This is based (actually almost verbatim atm) on this dudes workflow: https://www.lesleysitter.com/2019/08/23/roary-analysis/ 
 ## I have fucked with that dudes pipeline like a lot at this point, but it still is ocasionally helpful to go read it if you're stuck
 
-detachAllPackages <- function() {
-  basic.packages <- c("package:stats","package:graphics","package:grDevices","package:utils","package:datasets","package:methods","package:base")
-  package.list <- search()[ifelse(unlist(gregexpr("package:",search()))==1,TRUE,FALSE)]
-  package.list <- setdiff(package.list,basic.packages)
-  if (length(package.list)>0)  for (package in package.list) detach(package, character.only=TRUE)
-}
 
-detachAllPackages()
-
-install_load <- function(Required_Packages) {
-  for(package in Required_Packages){
-    if (!package %in% installed.packages()) install.packages(package, character.only = TRUE)
-    library(package, character.only = TRUE)
-  }
-}
-
-table_input <- read.csv("presenceAbsenceWithBetterPAO.csv", sep=",", na.strings = c("","NA"))
+table_input <- read.csv("DFASTandMauvePresAbs.csv", sep=",", na.strings = c("","NA"))
 table_input_df <- as.data.frame(table_input)
 ##when the csv is ordered, it does not retain colnames, this is me fixing that
-table_input_ordered <- read.csv("presenceAbsenceWithBetterPAOOrdered.csv", sep=",", na.strings = c("","NA"))
-table_input_ordered_df <- as.data.frame(table_input_ordered)
-colnames(table_input_ordered_df) <- colnames(table_input_df)
-View(table_input_ordered_df)
+##fixed in excel stage legacy code 
+##table_input_ordered <- read.csv("4iso - 4iso.csv", sep=",", na.strings = c("","NA"))
+##table_input_ordered_df <- as.data.frame(table_input_ordered)
+##colnames(table_input_ordered_df) <- colnames(table_input_df)
+##View(table_input_ordered_df)
 
 
-tableValues <- within(table_input_ordered_df, rm("Annotation", "Non.unique.Gene.name","No..isolates","No..sequences","Avg.sequences.per.isolate","Genome.Fragment","Order.within.Fragment","Accessory.Fragment","Accessory.Order.with.Fragment","QC","Min.group.size.nuc","Max.group.size.nuc","Avg.group.size.nuc"))
-View(tableValues)
+tableValues <- within(table_input, rm("Annotation", "Non.unique.Gene.name","No..isolates","No..sequences","Avg.sequences.per.isolate","Genome.Fragment","Order.within.Fragment","Accessory.Fragment","Accessory.Order.with.Fragment","QC","Min.group.size.nuc","Max.group.size.nuc","Avg.group.size.nuc"))
+##View(tableValues)
 
 abscence_presence <- as.matrix(tableValues[,-1])
 rownames(abscence_presence) <- tableValues[,1]
@@ -38,9 +24,9 @@ a_p_matrix <- mapply(abscence_presence, FUN=as.numeric)
 a_p_matrix <- matrix(data=a_p_matrix, ncol=length(colnames(abscence_presence)), nrow=length(row.names(abscence_presence)))
 row.names(a_p_matrix) <- row.names(abscence_presence)
 colnames(a_p_matrix) <- colnames(abscence_presence)
-colnames(a_p_matrix) <- c("020MIC", "13121.1", "15108", "1709.12", "2192", "39016", "39177", "57P31PA", "5C1_S24", "679", "968333S", "A5803", "AA2", "AES.1R_2", "AMT0023.30", "AMT0023.34", "AMT0060.1", "AMT0060.2", "AMT0060.3", "AUS058", "AUS066", "AUS088", "AUS089", "AUS23", "AUS52", "C3179", "CHA", "CPHL9433", "DK2", "DUN.001C", "DUN.003B", "DUN.004", "ILPAO1", "IST27", "IST27N", "Jpn1563", "KK1", "LES400", "LES431", "LESB58", "LMG14084", "Mi162_2", "NH57388A","PAO1", "PAK","PAO1", "PAO1_roary", "Pr335", "PAO1", "PA14", "TBCF10839", "U018a", "PA14" )
-View(a_p_matrix)
-View(abscence_presence)
+##colnames(a_p_matrix) <- c("020MIC", "13121.1", "15108", "1709.12", "2192", "39016", "39177", "57P31PA", "5C1_S24", "679", "968333S", "A5803", "AA2", "AES.1R_2", "AMT0023.30", "AMT0023.34", "AMT0060.1", "AMT0060.2", "AMT0060.3", "AUS058", "AUS066", "AUS088", "AUS089", "AUS23", "AUS52", "C3179", "CHA", "CPHL9433", "DK2", "DUN.001C", "DUN.003B", "DUN.004", "ILPAO1", "IST27", "IST27N", "Jpn1563", "KK1", "LES400", "LES431", "LESB58", "LMG14084", "Mi162_2", "NH57388A","PAO1", "PAK","PAO1", "PAO1_roary", "Pr335", "PAO1", "PA14", "TBCF10839", "U018a", "PA14" )
+##View(a_p_matrix)
+##View(abscence_presence)
 
 ##I want to remove genes that only show up in one strain and genes that show up in all strains
 ##I have decided to cheat and add a temporary rowsum coloumn and then filter it, and then slice off the extra row
@@ -50,21 +36,21 @@ View(NewMatrix2)
 
 ##I am loosing the will to live, lets make this a dataframe
 cheating <-as.data.frame(NewMatrix2)
-View(cheating)
+##View(cheating)
 ##Removes any genes that only show up once
 subsetcheating1 <- cheating[!(cheating$newCol<=1),]
-View(subsetcheating1)
+#View(subsetcheating1)
 ##Removes genes that are in every strain
-subsercheating2 <- subsetcheating1[!(subsetcheating1$newCol >=52 ),]
-View(subsercheating2)
+subsercheating2 <- subsetcheating1[!(subsetcheating1$newCol >=49 ),]
+#View(subsercheating2)
 ##Removes my cheating column
-altered_ap <- subsercheating2[,1:53]
-altered_ap <- as.numeric(altered_ap)
-View(altered_ap)
+altered_ap <- subsercheating2[,1:50]
+#altered_ap <- as.numeric(altered_ap)
+#View(altered_ap)
 ##make this back into a matrix
 altered_ap_matrix <- as.matrix(altered_ap)
-View(altered_ap_matrix)
-levels(altered_ap_matrix)
+#View(altered_ap_matrix)
+#levels(altered_ap_matrix)
 
 ##
 
